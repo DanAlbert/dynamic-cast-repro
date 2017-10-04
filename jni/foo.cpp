@@ -23,31 +23,20 @@ test_func load_func(void *lib, const char *name) {
   return sym;
 }
 
-int main() {
-  test_func test_dynamic;
-  test_func test_static;
-
-  // Commenting out these two lines makes both tests pass.
-  void *libfirst = load_library("libfirst.so");
-  void *libsecond = load_library("libsecond.so");
+int main(int argc, char**) {
+  // Explicitly loading libfirst.so before libtest.so causes the test to fail.
+  if (argc == 1) {
+    load_library("libfirst.so");
+  }
 
   void *libtest = load_library("libtest.so");
 
-  test_dynamic = load_func(libtest, "test_dynamic");
-  test_static = load_func(libtest, "test_static");
-
-  if (!test_static()) {
-    std::cout << "test_static() failed!" << std::endl;
+  test_func do_test = load_func(libtest, "do_test");
+  if (!do_test()) {
+    std::cout << "do_test() failed!" << std::endl;
     return EXIT_FAILURE;
   } else {
-    std::cout << "test_static() passed!" << std::endl;
-  }
-
-  if (!test_dynamic()) {
-    std::cout << "test_dynamic() failed!" << std::endl;
-    return EXIT_FAILURE;
-  } else {
-    std::cout << "test_dynamic() passed!" << std::endl;
+    std::cout << "do_test() passed!" << std::endl;
   }
 
   return EXIT_SUCCESS;
